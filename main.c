@@ -36,13 +36,13 @@ int CheckMatch(int *gAnswer, int *uAnswer){
              }
          }
      }
-     if (strike == 4) return 1;
+     if (strike == LEVEL) return 1;
      
      return 0;
 }
 
-void SetUsersAnswer(int *uAnswer,int life){
-    printf("\nLife %d::Input your Number: ", life);
+int SetUsersAnswer(int *uAnswer,int life){
+    printf("\nLife %d) Input your Number: ", life);
     switch(LEVEL){
         case 3:
              scanf("%1d%1d%1d", &uAnswer[0], &uAnswer[1], &uAnswer[2]);
@@ -53,31 +53,30 @@ void SetUsersAnswer(int *uAnswer,int life){
         case 5:
              scanf("%1d%1d%1d%1d%1d", &uAnswer[0], &uAnswer[1], &uAnswer[2], &uAnswer[3], &uAnswer[4]);
              break;
+        default:
+             system("cls");
+             puts("\nFatal Error:: Must be adjust LEVEL value to 3 ~ 5.\n");
+             return 1;
     }
     while(getchar() != '\n');    // Empty the buffer.
-
+    return 0;
 }
 
 int main(){
     
     //// Setting ////
-    if(LEVEL < 3 || LEVEL > 5){
-        puts("\nFatal Error:: Must be adjust LEVEL value to 3 ~ 5.\n");
-        system("PAUSE");
-        return 0;
-    }
     int life;
     int gAnswer[LEVEL];
     int uAnswer[LEVEL];
     ConstructGameAnswer(gAnswer);
     
-    // for(life = 0; life < LEVEL; life++) printf("%d",gAnswer[life]); puts("");     // To confirm game's answer.
+    //for(life = 0; life < LEVEL; life++) printf("%d",gAnswer[life]); puts("");     // To confirm game's answer.
     
     //// Running ////
     puts("Game Start!!");
     
     for(life = LIFECOUNT; life > 0; life--){
-        SetUsersAnswer(uAnswer, life);
+        if (SetUsersAnswer(uAnswer, life)) { system("PAUSE"); return 0; }   // Fatal Error.
         if (CheckDuplicate(uAnswer)){
             puts("> Please do not duplicate..");
         }else{
