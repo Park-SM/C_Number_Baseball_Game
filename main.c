@@ -2,88 +2,101 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define LIFE 10
+#define LIFECOUNT 10
+#define LEVEL 3    // 3 ~ 5
 
-int strike = 0;
 int ball = 0;
+int strike = 0;
 
-typedef struct tagAnswer{
-        int a;
-        int b;
-        int c;
-        int d;
-}Answer;
+int CheckDuplicate(int *Answer){
+    int i, j;
+    for (i = 0; i < LEVEL; i++)
+        for(j = i + 1; j < LEVEL; j++)
+              if(Answer[i] == Answer[j]) return 1;
+              
+    return 0;
+}
 
-void CheckMatch(Answer gA, Answer uA){
-  if(gA.a == uA.a) strike++;  // Check match about gA.a
-  if(gA.a == uA.b) ball++;
-  if(gA.a == uA.c) ball++;
-  if(gA.a == uA.d) ball++;
-  
-  if(gA.b == uA.a) ball++;    // Check match about gA.b
-  if(gA.b == uA.b) strike++;
-  if(gA.b == uA.c) ball++;
-  if(gA.b == uA.d) ball++;
-  
-  if(gA.c == uA.a) ball++;    // Check match about gA.c
-  if(gA.c == uA.b) ball++;
-  if(gA.c == uA.c) strike++;
-  if(gA.c == uA.d) ball++;
-  
-  if(gA.d == uA.a) ball++;    // Check match about gA.d
-  if(gA.d == uA.b) ball++;
-  if(gA.d == uA.c) ball++;
-  if(gA.d == uA.d) strike++;
+void ConstructGameAnswer(int *gAnswer){
+    int i;
+    srand((unsigned)time(NULL));    // Construct randomize.
+    do{
+        for (i = 0; i < LEVEL; i++) gAnswer[i] = rand() % 10;    // Construct random.
+    }while(CheckDuplicate(gAnswer));  // To prevent duplication.
+}
+
+int CheckMatch(int *gAnswer, int *uAnswer){
+     int i, j;
+     for (i = 0; i < 4; i++){
+         for (j = 0; j < 4; j++){
+             if( i == j ){
+                 if (gAnswer[i] == uAnswer[j]) strike++;
+             }else{
+                 if (gAnswer[i] == uAnswer[j]) ball++;
+             }
+         }
+     }
+     if (strike == 4) return 1;
+     
+     return 0;
+}
+
+void SetUsersAnswer(int *uAnswer,int life){
+    printf("\nLife %d::Input your Number: ", life);
+    switch(LEVEL){
+        case 3:
+             scanf("%1d%1d%1d", &uAnswer[0], &uAnswer[1], &uAnswer[2]);
+             break;
+        case 4:
+             scanf("%1d%1d%1d%1d", &uAnswer[0], &uAnswer[1], &uAnswer[2], &uAnswer[3]);
+             break;
+        case 5:
+             scanf("%1d%1d%1d%1d%1d", &uAnswer[0], &uAnswer[1], &uAnswer[2], &uAnswer[3], &uAnswer[4]);
+             break;
+    }
+    while(getchar() != '\n');    // Empty the buffer.
+
 }
 
 int main(){
     
-  //// Setting ////
-  int life;
-  int life_count = LIFE;
-  Answer gAnswer;       // Game's answer.
-  Answer uAnswer;       // User's answer.
-  
-  srand(time(NULL));    // Construct randomize.
-  
-  do{
-    gAnswer.a = rand() % 10;    // Construct random.
-    gAnswer.b = rand() % 10;
-    gAnswer.c = rand() % 10;
-    gAnswer.d = rand() % 10;
-  }while(gAnswer.a == gAnswer.b || gAnswer.a == gAnswer.c || gAnswer.a == gAnswer.d
-          || gAnswer.b == gAnswer.c || gAnswer.b == gAnswer.d || gAnswer.c == gAnswer.d);  // To prevent duplication.
-  
-  // printf("Game answer: %d%d%d%d\n\n", gAnswer.a, gAnswer.b, gAnswer.c, gAnswer.d);    // To Check the answer
-  
-  //// Running ////
-  pust("This game is simple Number_Baseball game."
-  for(life = life_count; life > 0; life--){
-
-    printf("Life %d::Input your Number: ", life);
-    scanf("%1d%1d%1d%1d", &uAnswer.a, &uAnswer.b, &uAnswer.c, &uAnswer.d);  // Input user data.
-    while(getchar() != '\n');    // Empty the buffer.
-    
-    if(uAnswer.a == uAnswer.b || uAnswer.a == uAnswer.c || uAnswer.a == uAnswer.d
-          || uAnswer.b == uAnswer.c || uAnswer.b == uAnswer.d || uAnswer.c == uAnswer.d)  // To prevent duplication.
-        puts("> Please do not duplicate..");
-    else{
-        CheckMatch(gAnswer, uAnswer);
-        if(strike == 4){
-             printf("> %d Strike, %d Ball!\n", strike, ball);
-             puts("\n:::: You are Winner!!! ::::\n");
-             system("PAUSE");
-             return 0;
-        }
-    
-        printf("> %d Strike, %d Ball!\n", strike, ball);
-        strike = 0;
-        ball = 0;
+    //// Setting ////
+    if(LEVEL < 3 || LEVEL > 5){
+        puts("\nFatal Error:: Must be adjust LEVEL value to 3 ~ 5.\n");
+        system("PAUSE");
+        return 0;
     }
-    puts("");
-  }
-  puts("\n:::: You are Loser ::::");
+    int life;
+    int gAnswer[LEVEL];
+    int uAnswer[LEVEL];
+    ConstructGameAnswer(gAnswer);
+    
+    // for(life = 0; life < LEVEL; life++) printf("%d",gAnswer[life]); puts("");     // To confirm game's answer.
+    
+    //// Running ////
+    puts("Game Start!!");
+    
+    for(life = LIFECOUNT; life > 0; life--){
+        SetUsersAnswer(uAnswer, life);
+        if (CheckDuplicate(uAnswer)){
+            puts("> Please do not duplicate..");
+        }else{
+            if(CheckMatch(gAnswer, uAnswer)){
+                printf("> %d Strike, %d Ball!\n", strike, ball);
+                puts("\n:::: You are Winner!!! ::::\n");
+                system("PAUSE");
+                return 0;
+            }
+    
+            printf("> %d Strike, %d Ball!\n", strike, ball);
+            strike = 0;
+            ball = 0;
+    
+            puts("");
+        }
+    }
+    puts("\n:::: You are Loser ::::");
   
-  system("PAUSE");   
-  return 0;
+    system("PAUSE");   
+    return 0;
 }
